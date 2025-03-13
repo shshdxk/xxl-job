@@ -588,7 +588,7 @@ $(function() {
 		rules : {
 			jobDesc : {
 				required : true,
-				maxlength: 50
+				maxlength: 250
 			},
 			author : {
 				required : true

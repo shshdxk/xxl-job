@@ -41,6 +41,7 @@
 		<!-- db -->
 		<mybatis-spring-boot-starter.version>3.0.4</mybatis-spring-boot-starter.version>
 		<mysql-connector-j.version>9.2.0</mysql-connector-j.version>
+        <DmJdbcDriver18.version>8.1.3.140</DmJdbcDriver18.version>
 		<!-- dynamic language -->
 		<groovy.version>4.0.25</groovy.version>
 	</properties>

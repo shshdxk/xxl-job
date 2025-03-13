@@ -22,7 +22,7 @@
 	<select id="findDead" parameterType="java.util.HashMap" resultType="java.lang.Integer" >
 		SELECT t.id
 		FROM xxl_job_registry AS t
-		WHERE t.update_time <![CDATA[ < ]]> DATE_ADD(#{nowTime},INTERVAL -#{timeout} SECOND)
+		WHERE t.update_time <![CDATA[ < ]]> #{nowTime}
 	</select>
 	
 	<delete id="removeDead" parameterType="java.lang.Integer" >
@@ -36,27 +36,31 @@
 	<select id="findAll" parameterType="java.util.HashMap" resultMap="XxlJobRegistry">
 		SELECT <include refid="Base_Column_List" />
 		FROM xxl_job_registry AS t
-		WHERE t.update_time <![CDATA[ > ]]> DATE_ADD(#{nowTime},INTERVAL -#{timeout} SECOND)
+		WHERE t.update_time <![CDATA[ > ]]> #{nowTime}
 	</select>
 
 	<insert id="registrySaveOrUpdate" >
-		INSERT INTO xxl_job_registry( `registry_group` , `registry_key` , `registry_value`, `update_time`)
-		VALUES( #{registryGroup}  , #{registryKey} , #{registryValue}, #{updateTime})
-		ON DUPLICATE KEY UPDATE
-			`update_time` = #{updateTime}
-	</insert>
+        MERGE INTO xxl_job_registry t
+            USING (SELECT #{registryGroup} AS registry_group, #{registryKey} AS registry_key, #{registryValue} AS registry_value, #{updateTime} AS update_time FROM DUAL) s
+            ON (t.registry_group = s.registry_group AND t.registry_key = s.registry_key)
+            WHEN MATCHED THEN
+                UPDATE SET t.registry_value = s.registry_value, t.update_time = s.update_time
+            WHEN NOT MATCHED THEN
+                INSERT (registry_group, registry_key, registry_value, update_time)
+                    VALUES (s.registry_group, s.registry_key, s.registry_value, s.update_time);
+    </insert>
 
 	<!--
     <update id="registryUpdate" >
         UPDATE xxl_job_registry
-        SET `update_time` = #{updateTime}
-        WHERE `registry_group` = #{registryGroup}
-          AND `registry_key` = #{registryKey}
-          AND `registry_value` = #{registryValue}
+        SET "update_time" = #{updateTime}
+        WHERE "registry_group" = #{registryGroup}
+          AND "registry_key" = #{registryKey}
+          AND "registry_value" = #{registryValue}
     </update>
 
     <insert id="registrySave" >
-        INSERT INTO xxl_job_registry( `registry_group` , `registry_key` , `registry_value`, `update_time`)
+        INSERT INTO xxl_job_registry( "registry_group" , "registry_key" , "registry_value", "update_time")
         VALUES( #{registryGroup}  , #{registryKey} , #{registryValue}, #{updateTime})
     </insert>
 	-->
